@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-export default function Apologizer() {
+export default function ApologizerChat() {
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [apology, setApology] = useState("");
 
   const templates = [
     (txt) =>
@@ -25,41 +25,67 @@ export default function Apologizer() {
 
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
-  const generateApology = (e) => {
+  const sendMessage = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
+
+    const userMsg = { text: input, sender: "user" };
+    setMessages((prev) => [...prev, userMsg]);
+
     const randomTemplate =
       templates[Math.floor(Math.random() * templates.length)];
-    setApology(randomTemplate(input.trim()));
+    const apologyMsg = { text: randomTemplate(input.trim()), sender: "bot" };
+
+    setInput("");
+
+    // Delay for bot "thinking"
+    setTimeout(() => {
+      setMessages((prev) => [...prev, apologyMsg]);
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6 font-mono">
-      <h1 className="text-4xl mb-6">🙏 The Apologizer</h1>
+    <div className="min-h-screen bg-gray-900 flex flex-col font-sans">
+      {/* Header */}
+      <div className="bg-gray-800 text-white p-4 text-center font-bold text-lg">
+        🙏 The Apologizer
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`max-w-[75%] p-3 rounded-lg ${
+              msg.sender === "user"
+                ? "bg-blue-500 text-white self-end ml-auto"
+                : "bg-gray-700 text-white self-start"
+            }`}
+          >
+            {msg.text}
+          </div>
+        ))}
+      </div>
+
+      {/* Input Bar */}
       <form
-        onSubmit={generateApology}
-        className="flex flex-col items-center w-full max-w-md"
+        onSubmit={sendMessage}
+        className="p-3 bg-gray-800 flex gap-2 border-t border-gray-700"
       >
         <input
           type="text"
           placeholder="Type anything..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="w-full px-4 py-2 mb-4 rounded text-black"
+          className="flex-1 px-4 py-2 rounded bg-gray-700 text-white outline-none"
         />
         <button
           type="submit"
-          className="px-6 py-2 bg-red-500 hover:bg-red-600 rounded transition"
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
         >
-          Apologize
+          Send
         </button>
       </form>
-
-      {apology && (
-        <div className="mt-6 bg-gray-800 p-4 rounded max-w-md text-center">
-          <p className="italic">"{apology}"</p>
-        </div>
-      )}
     </div>
   );
 }
